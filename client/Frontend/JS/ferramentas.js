@@ -5,9 +5,9 @@ let iaAtual = 'openai';
 function getApiUrl(service) {
     const isProduction = window.location.hostname !== 'localhost';
     const urls = {
-        socket: isProduction ? 'https://seu-socket-server.onrender.com' : 'http://localhost:3000',
-        lateral: isProduction ? 'https://seu-lateral-server.onrender.com' : 'http://localhost:5001', 
-        colaborativo: isProduction ? 'https://seu-colaborativo-server.onrender.com' : 'http://localhost:5002'
+        socket: isProduction ? 'https://salt-lack.onrender.com' : 'http://localhost:3000',
+        lateral: isProduction ? 'https://salt-lack-lateral.onrender.com' : 'http://localhost:5001', 
+        colaborativo: isProduction ? 'https://salt-lack-colaborativo.onrender.com' : 'http://localhost:5002'
     };
     return urls[service];
 }
