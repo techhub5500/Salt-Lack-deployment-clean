@@ -14,11 +14,10 @@ import Mixpanel from 'mixpanel';
 
  dotenv.config();
 
- 
-app.use(express.json());
-app.use(express.json());
-// ADICIONAR esta linha também:
-app.options('*', cors());
+const app = express();
+
+// ORDEM CORRETA DOS MIDDLEWARES:
+// 1. PRIMEIRO: CORS principal
 app.use(cors({
   origin: [
     'http://localhost:5173', 
@@ -33,6 +32,13 @@ app.use(cors({
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
+
+// 2. SEGUNDO: Handler específico para OPTIONS
+app.options('*', cors());
+
+// 3. TERCEIRO: Express JSON (apenas uma vez!)
+app.use(express.json());
+
 
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {

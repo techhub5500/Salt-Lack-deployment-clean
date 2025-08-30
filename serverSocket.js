@@ -12,13 +12,9 @@ import dotenv from 'dotenv';
 import Mixpanel from 'mixpanel';
 import cors from 'cors';
 
+dotenv.config();
+const app = express();
 
- dotenv.config();
-
- app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client')));
-
-app.options('*', cors());
 app.use(cors({
   origin: [
     'http://localhost:5173', 
@@ -33,6 +29,9 @@ app.use(cors({
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
+
+app.options('*', cors());
+app.use(express.json());
 
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {
@@ -133,8 +132,6 @@ const Chat = mongoose.model('Chat', chatSchema);
 // ======================== CONFIGURAÇÃO DE PATHS E APP ========================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const app = express();
 const server = http.createServer(app);
 const io = new SocketIo(server, {
   cors: {
