@@ -14,6 +14,26 @@ import Mixpanel from 'mixpanel';
 
  dotenv.config();
 
+ 
+app.use(express.json());
+app.use(express.json());
+// ADICIONAR esta linha também:
+app.options('*', cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173',
+    'https://salt-lack-frontend.onrender.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
+
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {
   mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
@@ -63,27 +83,6 @@ function trackMessageSent(userId) {
     console.warn('Erro ao trackMessageSent:', e?.message || e);
   }
 }
-
-app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://127.0.0.1:5173',
-    'https://salt-lack-frontend.onrender.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-
-// ADICIONAR esta linha também:
-app.options('*', cors());
-
-app.use(express.json());
-app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename)

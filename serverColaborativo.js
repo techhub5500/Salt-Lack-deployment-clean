@@ -6,18 +6,6 @@ import Mixpanel from 'mixpanel';
 
  dotenv.config();
 
-let mixpanel;
-if (process.env.MIXPANEL_TOKEN) {
-  mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
-} else {
-  console.warn('MIXPANEL_TOKEN não definido — eventos Mixpanel desativados');
-  // no-op para evitar checagens espalhadas
-  mixpanel = {
-    track: () => {},
-    people: { set: () => {}, increment: () => {} }
-  };
-}
-
 const app = express();
 app.use(cors({
   origin: [
@@ -35,6 +23,18 @@ app.use(cors({
 }));
 
 app.options('*', cors());
+
+let mixpanel;
+if (process.env.MIXPANEL_TOKEN) {
+  mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+} else {
+  console.warn('MIXPANEL_TOKEN não definido — eventos Mixpanel desativados');
+  // no-op para evitar checagens espalhadas
+  mixpanel = {
+    track: () => {},
+    people: { set: () => {}, increment: () => {} }
+  };
+}
 
 // ====== MONGODB SETUP ======
 mongoose.connect(process.env.MONGO_URI, {

@@ -10,9 +10,29 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Mixpanel from 'mixpanel';
+import cors from 'cors';
 
 
  dotenv.config();
+
+ app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client')));
+
+app.options('*', cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173',
+    'https://salt-lack-frontend.onrender.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {
@@ -129,25 +149,6 @@ const io = new SocketIo(server, {
   }
 });
 const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client')));
-app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://127.0.0.1:5173',
-    'https://salt-lack-frontend.onrender.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-
-app.options('*', cors());
 
 // ======================== ARQUIVOS DE DADOS ========================
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
