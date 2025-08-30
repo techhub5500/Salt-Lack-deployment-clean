@@ -79,7 +79,7 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// ADICIONAR esta linha também (para tratar preflight manualmente se necessário):
+// ADICIONAR esta linha também:
 app.options('*', cors());
 
 app.use(express.json());
