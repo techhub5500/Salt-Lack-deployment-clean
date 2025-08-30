@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Metadados e links de estilos globais e específicos -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Tempo Real - Sistema de Login</title>
+    <!-- Ícones e estilos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="frontend/css/global.css">
+    <link rel="stylesheet" href="frontend/css/workspace.css">
+    <link rel="stylesheet" href="frontend/css/sharing.css">
+    <link rel="stylesheet" href="frontend/css/chatgpt.css">
+    <link rel="stylesheet" href="frontend/css/chatmodal.css">
+    
+</head>
+<body>
+    <!-- Feedback animado no topo -->
+    <div id="feedback-anim" class="feedback-anim">Feedback</div>
+
+    <!-- Layout principal: Sidebar + Conteúdo -->
+    <div class="main-layout">
+        <!-- Sidebar lateral fixa -->
+        <aside id="sidebar" class="sidebar expanded">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Feedback</span>
+                <button id="toggleSidebar" class="sidebar-toggle">
+                    <i class="fa fa-angle-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <!-- Botão de logout -->
+                    <li id="login-button" class="sidebar-item">
+    <span class="login-button">
+        <button id="logoutBtn" class="logout-btn" title="Sair">
+            <i class="fa fa-sign-out-alt"></i>
+        </button>
+    </span>
+</li>
+                    <!-- Navegação entre seções -->
+                    <li id="nav-chatgpt" class="sidebar-item active">
+                        <span class="sidebar-icon"><i class="fa-solid fa-comment"></i></span>
+                        <span class="sidebar-label">Chat Com IA</span>
+                    </li>
+                    <li id="nav-sharing" class="sidebar-item">
+                        <span class="sidebar-icon"><i class="fa-solid fa-share-nodes"></i></span>
+                        <span class="sidebar-label">Mensagens</span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Área principal de conteúdo -->
+        <div id="mainContent" class="main-content">
+            <!-- Seção ChatGPT (padrão) -->
+            <section id="chatgptSection" class="content-section">
+                <div class="chatgpt-flex-gpt" style="display: flex; height: 100%;">
+                    <!-- Sidebar de ações do ChatGPT -->
+                    <aside id="chatgptSidebarGpt" class="chatgpt-sidebar-gpt">
+                        <!-- Botões de ação do ChatGPT -->
+                        <button id="btnNovoChatGpt" class="chatgpt-btn" title="Novo Chat"><i class="fa fa-plus"></i></button>
+                        <button id="btnHistoricoChatGpt" class="chatgpt-btn" title="Histórico"><i class="fa fa-history"></i></button>
+                        <button id="btnSelecionarMensagensGpt" class="chatgpt-btn" title="Documentos"><i class="fa-solid fa-folder-open"></i></button>
+                        <button onclick="abrirModalIA()" class="ia-button" title="Selecionar IA"><i class="fa fa-robot"></i></button>
+                    </aside>
+                    <!-- Área de mensagens do ChatGPT -->
+                    <div class="chatgpt-container-gpt">
+                        <h2 class="chatgpt-title-gpt" id="iaAtual">Chat</h2>
+                        <div class="chatgpt-messages-gpt" id="chatgptMessagesGpt"></div>
+                        
+                     <!-- Botões de compartilhar/enviar mensagens -->
+<button id="btnCompartilharMensagensGpt" class="chatgpti-btn btn-compartilhar" style="display:none;">
+    <i class="fa fa-share"></i> Compartilhar
+</button>
+<button id="btnCancelarSelecaoMensagensGpt" class="chatgpti-btn btn-compartilhar" style="display:none;">
+    <i class="fa fa-times"></i> Cancelar
+</button>
+<button id="btnEnviarMensagensFixGpt" class="chatgpt-btn btn-primary hidden" style="position:sticky;top:8px;z-index:10;margin-bottom:8px;">
+    <i class="fa fa-share"></i> Enviar mensagens
+</button>
+
+                        <!-- Formulário de envio de mensagem -->
+                         <div id="chatgptHintBubble" class="chatgpt-hint-bubble">
+                        <span>Escreva sua tarefa e nós indicaremos a IA certa para você.</span>
+                    </div>
+                       <form id="chatgptFormGpt" class="chatgpt-form-gpt">
+    <div class="textarea-with-action">
+    <textarea id="chatgptInputGpt" rows="4" placeholder="Escreva sua tarefa..." ></textarea>
+    <button type="button" id="btnAprimorarPrompt" class="btn-aprimorar" disabled title="Aprimorar prompt">Aprimorar <br> prompt</button>
+  </div>
+  <button type="submit" class="btn-send" title="Enviar">
+    <i class="fa fa-paper-plane"></i>
+    <span class="sr-only">Enviar</span>
+  </button>
+</form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modal de Histórico do ChatGPT -->
+            <div id="chatgptHistoricoModalGpt" class="chatgpt-modal-gpt hidden">
+                <!-- Modal para exibir histórico de chats do ChatGPT -->
+                <div class="chatgpt-modal-content-gpt">
+                    <div class="chatgpt-modal-header-gpt">
+                        <h3>Histórico de Chats</h3>
+                        <button id="btnFecharHistoricoGpt" class="chatgpt-close-btn-gpt">&times;</button>
+                    </div>
+                    <div class="chatgpt-modal-search-gpt">
+                        <input type="text" id="chatgptSearchInputGpt" placeholder="Buscar por título ou conteúdo...">
+                    </div>
+                    <div id="chatgptHistoricoListGpt" class="chatgpt-historico-list-gpt"></div>
+                    <div id="chatgptHistoricoEmptyGpt" class="chatgpt-historico-empty-gpt hidden">
+                        <p>Nenhum chat encontrado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Sharing (chat em tempo real) -->
+            <section id="sharingSection" class="content-section hidden">
+                <div class="container">
+                    <!-- Modal de autenticação (login/cadastro) -->
+                    <div id="authModal" class="modal">
+                        <div class="modal-content auth-modal">
+                            <h2 id="authTitle">Entrar no Chat</h2>
+                            <!-- Formulário de login -->
+                            <form id="loginForm" class="auth-form">
+                                <div class="input-group">
+                                    <input type="text" id="loginUsername" placeholder="Username ou Email" required>
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" id="loginPassword" placeholder="Senha" required>
+                                </div>
+                                <button type="submit" class="auth-btn">Entrar</button>
+                                <p class="switch-auth">Não tem uma conta? <a href="#" id="showRegister">Cadastre-se</a></p>
+                            </form>
+                            <!-- Formulário de cadastro -->
+                            <form id="registerForm" class="auth-form hidden">
+                                <div class="input-group">
+                                    <input type="text" id="registerUsername" placeholder="Nome de usuário" required minlength="3" maxlength="20">
+                                </div>
+                                <div class="input-group">
+                                    <input type="email" id="registerEmail" placeholder="Email" required>
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" id="registerPassword" placeholder="Senha (mín. 6 caracteres)" required minlength="6">
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" id="registerConfirmPassword" placeholder="Confirmar senha" required>
+                                </div>
+                                <button type="submit" class="auth-btn">Cadastrar</button>
+                                <p class="switch-auth">Já tem uma conta? <a href="#" id="showLogin">Entrar</a></p>
+                            </form>
+                            <div id="authError" class="error-message hidden"></div>
+                        </div>
+                    </div>
+                    <!-- Interface principal do chat (aparece após login) -->
+                    <div id="chatContainer" class="chat-container hidden">
+                        <div class="chat-header">
+                            <h1>💬 Compartilhe seus trabalhos feitos com IA</h1>
+                            <div class="user-info">
+                                <span id="currentUser"></span>
+                                <button id="inviteBtn" class="invite-btn">➕ Convidar</button>
+                            </div>
+                        </div>
+                        <div class="chat-main">
+                            <!-- Sidebar de chats e convites -->
+                            <div class="sharing-sidebar">
+                                <h3>💬 Seus Chats</h3>
+                                <div id="chatsList" class="chats-list">
+                                    <!-- Lista de chats do usuário -->
+                                    <div class="chat-item" style="cursor:pointer;padding:12px;border-radius:8px;background:#f0f2f8;margin-bottom:8px;">
+                                        <strong>Chat com Usuário Exemplo</strong>
+                                    </div>
+                                    <div class="no-chats">
+                                        <p>Nenhum chat ativo</p>
+                                        <p>Convide alguém para começar!</p>
+                                    </div>
+                                </div>
+                                <!-- Seção de convites recebidos -->
+                                <div id="invitesSection" class="invites-section hidden">
+                                    <h4>📩 Convites</h4>
+                                    <div id="invitesList"></div>
+                                </div>
+                            </div>
+
+                            <!-- coloque este template logo antes do messagesContainer -->
+<template id="document-message-template">
+  <div class="message document-message">
+    <div class="message-header" hidden></div>
+
+    <div class="document-preview" data-message-id="">
+      <div class="document-preview-inner">
+        <div class="document-icon" aria-hidden="true">📄</div>
+
+        <div class="document-info">
+          <div class="document-title">Título do documento</div>
+          <div class="document-preview-text">Resumo / preview do documento</div>
+        </div>
+
+        <div class="document-action"><i class="fa fa-external-link" aria-hidden="true"></i> Abrir</div>
+      </div>
+    </div>
+
+    <div class="message-time">12:34</div>
+  </div>
+</template>
+                            <!-- Área de mensagens do chat -->
+                            <div class="chat-content">
+                                <div id="messagesContainer" class="messages-container">
+                                    <div class="welcome-message">
+                                        <h3>🎉 Bem-vindo ao chat!</h3>
+                                        <p>Selecione um chat existente ou convide alguém para começar a conversar.</p>
+                                    </div>
+                                </div>
+                                <!-- Indicador de digitação -->
+                                <div id="typingIndicator" class="typing-indicator hidden">
+                                    <span id="typingText"></span>
+                                </div>
+                                <!-- Formulário de envio de mensagem -->
+                                <div class="message-form">
+                                    <form id="messageForm">
+                                        <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off" maxlength="500" disabled>
+                                        <button type="submit" id="sendBtn" disabled><span>📤</span></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal para convidar usuário para chat -->
+                    <div id="inviteModal" class="modal hidden">
+                        <div class="modal-content invite-modal">
+                            <h3>Convidar usuário para chat</h3>
+                            <div class="input-group">
+                                <input type="text" id="searchUserInput" placeholder="Buscar usuário..." autocomplete="off">
+                            </div>
+                            <div id="searchResults" class="search-results"></div>
+                            <div class="input-group">
+                                <input type="text" id="chatNameInput" placeholder="Nome do chat (opcional)" maxlength="50">
+                            </div>
+                            <div class="modal-actions">
+                                <button id="cancelInvite" class="cancel-btn">Cancelar</button>
+                                <button id="sendInviteBtn" class="send-btn" disabled>Enviar Convite</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal para convite recebido -->
+                    <div id="inviteReceivedModal" class="modal hidden">
+                        <div class="modal-content">
+                            <h3>Convite para Chat</h3>
+                            <p id="inviteMessage"></p>
+                            <div class="modal-actions">
+                                <button id="rejectInvite" class="cancel-btn">Recusar</button>
+                                <button id="acceptInvite" class="send-btn">Aceitar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Status de conexão -->
+                <div id="connectionStatus" class="connection-status connected">
+                    🟢 Conectado
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal para ordenar mensagens da workspace -->
+    <div id="order-modal" class="order-modal" style="display:none;">
+        <div class="order-modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Ordenar Mensagens</h3>
+                <button onclick="closeOrderModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+            <p style="color: #666; margin-bottom: 15px;">Arraste as mensagens para reorganizar a ordem:</p>
+            <div id="order-list"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-secondary" onclick="closeOrderModal()">Cancelar</button>
+                <button class="btn-primary" onclick="applyOrder()" style="margin-left: 10px;">Aplicar Ordem</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificação de chat -->
+    <div id="chatNotification" class="chat-notification hidden"></div>
+
+    <!-- Modal para enviar mensagens do ChatGPT para workspace -->
+    <div id="chatgptEnviarModalGpt" class="chatgpt-modal-gpt hidden">
+        <div class="chatgpt-modal-content-gpt">
+            <div class="chatgpt-modal-header-gpt">
+                <h3>Enviar mensagens para Workspace</h3>
+                <button id="btnFecharEnviarModalGpt" class="chatgpt-close-btn-gpt">&times;</button>
+            </div>
+            <div>
+                <label for="workspaceSelectGpt">Escolha uma área de trabalho:</label>
+                <select id="workspaceSelectGpt" style="width:100%;margin-bottom:12px;"></select>
+                <button id="btnCriarWorkspaceGpt" class="chatgpt-btn" style="margin-bottom:12px;"><i class="fa fa-plus"></i> Criar nova área de trabalho</button>
+                <input type="text" id="workspaceNomeInputGpt" class="hidden" placeholder="Nome da nova área de trabalho" maxlength="50" style="width:100%;margin-bottom:12px;">
+            </div>
+            <div style="text-align:right;">
+                <button id="btnEnviarMensagensGpt" class="chatgpt-btn btn-primary" disabled>Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de compartilhamento de mensagens -->
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <h3><i class="fa-solid fa-share"></i> Compartilhar Mensagens</h3>
+            </div>
+            <div class="share-modal-body">
+                <!-- Mensagens selecionadas para compartilhar -->
+                <div class="share-form-group">
+                    <label>Mensagens Selecionadas</label>
+                    <div id="selectedMessagesContainer" class="selected-messages"></div>
+                </div>
+                <!-- Objetivo do compartilhamento -->
+                <div class="share-form-group required">
+                    <label for="shareObjective">Objetivo</label>
+                    <select id="shareObjective">
+                        <option value="">Selecione um objetivo</option>
+                        <option value="colaborar">Colaborar</option>
+                        <option value="revisar">Revisar</option>
+                        <option value="entregar">Entregar</option>
+                    </select>
+                </div>
+                <!-- Prazo do compartilhamento -->
+                <div class="share-form-group required">
+                    <label for="shareDeadline">Prazo</label>
+                    <input type="date" id="shareDeadline">
+                </div>
+                <!-- Seleção de chat para envio -->
+                <div class="share-form-group required">
+                    <label for="shareChatSelect">Para qual chat enviar</label>
+                    <select id="shareChatSelect">
+                        <option value="">Selecione um chat</option>
+                        <!-- Os chats serão preenchidos via JS -->
+                    </select>
+                </div>
+                <!-- Observações opcionais -->
+                <div class="share-form-group">
+                    <label for="shareObservations">Observações (opcional)</label>
+                    <textarea id="shareObservations" class="obs-textarea" placeholder="Digite suas observações..."></textarea>
+                    <button type="button" class="obs-expand-btn" onclick="openObservationsModal()"><i class="fa-solid fa-expand"></i> Expandir</button>
+                </div>
+                <div id="shareErrorMessage" class="error-message" style="display: none;"></div>
+            </div>
+            <div class="share-modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeShareModal()">Cancelar</button>
+                <button type="button" class="btn-send" onclick="sendShare()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para observações expandidas -->
+    <div id="obsModal" class="obs-modal">
+        <div class="obs-modal-content">
+            <div class="obs-modal-header">
+                <h3><i class="fa-solid fa-comment"></i> Observações</h3>
+            </div>
+            <div class="obs-modal-body">
+                <textarea id="obsExpandedText" placeholder="Digite suas observações detalhadas..."></textarea>
+            </div>
+            <div class="obs-modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeObservationsModal()">Cancelar</button>
+                <button type="button" class="btn-send" onclick="saveObservations()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+   <!-- Modal de seleção de IA -->
+    <div class="ia-modal-overlay" id="iaModal">
+        <div class="ia-modal">
+            <div class="ia-modal-header">
+                <h3>Selecionar Inteligência Artificial</h3>
+                <button class="ia-modal-close" onclick="fecharModalIA()">&times;</button>
+            </div>
+            <div class="ia-modal-body">
+                <div class="ia-atual">
+                    <h4>IA em uso no momento</h4>
+                    <!-- atributo data-ia-current para sincronização -->
+                    <p id="iaAtualModal" data-ia-current>ChatGPT</p>
+                </div>
+                <div class="ia-lista">
+                    <!-- Lista de IAs disponíveis -->
+                    <div class="ia-item" data-ia="openai">
+                        <h4><span class="ia-icon">🤖</span> ChatGPT</h4>
+                        <p>Excelente para conversas gerais, criatividade, programação e análise de textos. Modelo versátil e confiável.</p>
+                        <button class="ia-btn" data-ia="openai" onclick="selecionarIA('openai', 'ChatGPT')">Usar</button>
+                    </div>
+                    <div class="ia-item" data-ia="claude">
+                        <h4><span class="ia-icon">🧠</span> Claude</h4>
+                        <p>Especialista em análise profunda, raciocínio lógico e tarefas que exigem precisão. Ótimo para pesquisa.</p>
+                        <button class="ia-btn" data-ia="claude" onclick="selecionarIA('claude', 'Claude')">Usar</button>
+                    </div>
+                    <div class="ia-item" data-ia="gemini">
+                        <h4><span class="ia-icon">💎</span> Gemini</h4>
+                        <p>Forte em processamento multimodal, matemática e análise de dados. Desenvolvido pelo Google.</p>
+                        <button class="ia-btn" data-ia="gemini" onclick="selecionarIA('gemini', 'Gemini')">Usar</button>
+                    </div>
+                    <div class="ia-item" data-ia="deepseek">
+                        <h4><span class="ia-icon">🔬</span> DeepSeek</h4>
+                        <p>Especializado em programação, código e tarefas técnicas. Excelente para desenvolvedores.</p>
+                        <button class="ia-btn" data-ia="deepseek" onclick="selecionarIA('deepseek', 'DeepSeek')">Usar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de sugestão de IA para tarefa -->
+    <div class="sugestao-ia-modal-overlay" id="popup-sugestao-ia" style="display: none;">
+        <div class="sugestao-ia-modal">
+            <div class="sugestao-ia-modal__header">Sugestão de IA para sua tarefa</div>
+            <div class="sugestao-ia-modal__info">
+                <div><strong>IA atual:</strong> ChatGPT</div>
+                <div><strong>IA recomendada:</strong> Claude</div>
+            </div>
+            <div class="sugestao-ia-modal__motivo">Claude oferece estrutura impecável e rigor profissional.</div>
+            <div class="sugestao-ia-modal__actions">
+                <button class="sugestao-ia-modal__btn sugestao-ia-modal__btn--secondary" id="btnContinuarIA">Continuar com ChatGPT</button>
+                <button class="sugestao-ia-modal__btn" id="btnTrocarIA">Migrar para Claude</button>
+            </div>
+        </div>
+    </div>
+
+<div id="documentoGeradoContainerGpt" class="documento-gerado-modal-gpt hidden">
+  <div class="documento-gerado-modal-gpt__content">
+    <div class="documento-gerado-header-gpt">
+      <button id="btnComentarDocumentoGpt" class="documento-gerado-btn-gpt documento-gerado-btn-comentar-gpt">
+        <i class="fa fa-comment"></i> Comentar
+      </button>
+      <button class="documento-gerado-modal-gpt__close" id="closeDocumentoGeradoGpt" title="Fechar">&times;</button>
+    </div>
+    <!-- Spinner de carregamento -->
+    <<div id="documentoSpinnerGpt" class="documento-spinner-gpt hidden">
+  <div class="loader"></div>
+  <div id="documentoSpinnerFrasesGpt" class="documento-spinner-frases-gpt"></div>
+</div>
+    <div class="documento-gerado-view-gpt" id="documentoGeradoContentGpt">
+      <!-- O conteúdo do documento gerado será inserido via JS -->
+    </div>
+    <div class="documento-gerado-actions-gpt">
+      <button id="btnSalvarDocumentoGeradoGpt" class="documento-gerado-btn-gpt documento-gerado-btn-primary-gpt">
+        <i class="fa fa-save"></i> Salvar
+      </button>
+      <button id="btnCancelarDocumentoGeradoGpt" class="documento-gerado-btn-gpt documento-gerado-btn-secondary-gpt">
+        <i class="fa fa-times"></i> Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Comentário -->
+<div id="comentarioModalGpt" class="comentario-modal-gpt hidden">
+  <div class="comentario-modal-gpt__content">
+    <h3>Comentário</h3>
+    <textarea id="comentarioInputGpt" rows="4" style="width:100%;margin-bottom:12px;" placeholder="Digite seu comentário..."></textarea>
+    <div class="comentario-modal-gpt__actions">
+      <button id="btnEditarComentarioGpt" class="documento-gerado-btn-gpt documento-gerado-btn-primary-gpt">Editar</button>
+      <button id="btnApagarComentarioGpt" class="documento-gerado-btn-gpt documento-gerado-btn-secondary-gpt">Apagar</button>
+      <button id="btnFecharComentarioGpt" class="documento-gerado-btn-gpt">Fechar</button>
+    </div>
+  </div>
+</div>
+
+    <!-- Modal Página Documentos -->
+    <div id="paginaDocumentos" class="pagina-documentos-modal hidden">
+        <div class="pagina-documentos-container">
+            <div class="pagina-documentos-header">
+                <h2><i class="fa fa-file-alt"></i> Documentos Gerados</h2>
+                <button id="btnFecharPaginaDocumentos" class="chatgpt-btn" title="Fechar"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="pagina-documentos-list" id="listaDocumentosGerados"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+
+    <div id="paginaDocumentosRecebidos" class="pagina-documentos-modal hidden">
+    <div class="pagina-documentos-container">
+        <div class="pagina-documentos-header">
+            <h2><i class="fa fa-file-import"></i> Documentos Recebidos</h2>
+            <button id="btnFecharPaginaDocumentosRecebidos" class="chatgpt-btn" title="Fechar"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="pagina-documentos-list" id="listaDocumentosRecebidos"></div>
+    </div>
+</div>
+
+
+<!-- Modal Compartilhar Documento -->
+<div id="modalCompartilharDocumento" class="share-modal-gpt hidden">
+  <div class="share-modal-gpt__content">
+    <button class="share-modal-gpt__close" id="closeModalCompartilharGpt" title="Fechar">&times;</button>
+    <h2 class="share-modal-gpt__title">Compartilhar Documento</h2>
+    <div class="share-modal-gpt__info">
+      <strong>Documento:</strong> <span id="modalCompartilharTituloGpt"></span>
+    </div>
+    <div class="share-modal-gpt__chat-list" id="listaChatsCompartilharGpt">
+      <select id="chatSelectCompartilharGpt" class="share-modal-gpt__select">
+        <option value="">Selecione um chat...</option>
+      </select>
+    </div>
+    <div class="share-modal-gpt__actions">
+      <button id="btnEnviarCompartilharGpt" class="share-modal-gpt__btn" disabled>Compartilhar</button>
+      <button id="btnCancelarCompartilharGpt" class="share-modal-gpt__btn share-modal-gpt__btn-secondary">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+    <!-- Modal Documento (detalhes de documento compartilhado) -->
+    <!-- Modal Documento (detalhes de documento compartilhado) -->
+<div id="documentModal" class="document-modal" style="display: none;">
+    <div class="document-modal-content">
+        <div class="document-modal-header">
+            <div>
+                <h3 id="docTitle"></h3>
+                <div class="document-meta">
+                    <span>🕐 <span id="docDate"></span></span>
+                </div>
+            </div>
+            <button class="document-modal-close" onclick="closeDocumentModal()">&times;</button>
+        </div>
+        <div class="document-modal-body">
+            <div class="document-section">
+                <h4><i class="fa fa-target"></i> Objetivo</h4>
+                <p id="docObjective"></p>
+            </div>
+            <div class="document-section">
+                <h4><i class="fa fa-calendar"></i> Prazo</h4>
+                <p id="docDeadline"></p>
+            </div>
+            <div class="document-section">
+                <h4><i class="fa fa-comment"></i> Observações</h4>
+                <p id="docObservations"></p>
+            </div>
+            <div class="document-section">
+                <h4><i class="fa fa-file-alt"></i> Conteúdo do Documento</h4>
+                <button id="btnAcessarDocumento" class="btn-acesso-documento"><i class="fa fa-external-link-alt"></i> Acessar Documento</button>
+            </div>
+            <!-- SEÇÃO REMOVIDA: Mensagens Compartilhadas -->
+        </div>
+        <div class="document-modal-footer">
+            <button class="btn-secondary" onclick="closeDocumentModal()">Fechar</button>
+            <button class="btn-primary" onclick="replyToDocument()"><i class="fa fa-reply"></i> Responder</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal Documento Tela Cheia -->
+    <div id="documentFullscreenModal" class="document-fullscreen-modal" style="display: none;">
+        <div class="document-fullscreen-content">
+            <div class="document-fullscreen-header">
+                <h2 id="docFullscreenTitle"></h2>
+                <button class="document-fullscreen-close" onclick="closeFullscreenDocument()">&times;</button>
+            </div>
+            <div class="document-fullscreen-body">
+                <div id="docFullscreenContent" class="document-fullscreen-text"></div>
+            </div>
+            <div class="document-fullscreen-footer">
+                <button class="btn-secondary" onclick="closeFullscreenDocument()"><i class="fa fa-times"></i> Fechar</button>
+                <button class="btn-primary" onclick="downloadDocument()"><i class="fa fa-download"></i> Download</button>
+                <button id="btnAddToReceivedDocuments" class="btn-primary" style="display:none;">
+                    <i class="fa fa-plus"></i> Adicionar em documentos recebidos
+                </button>
+</div>
+        </div>
+    </div>
+
+
+    <!-- Modal de escolha de tipo de documento -->
+<div id="modalEscolhaTipoDocumentoGpt" class="modal-escolha-tipo-documento-gpt" style="display:none;">
+  <div class="modal-content-escolha-gpt">
+    <button class="close-btn-escolha-gpt" id="closeModalEscolhaTipoDocumentoGpt">&times;</button>
+    <h2>Escolha o tipo de documento</h2>
+    <div class="opcoes-btn-group-escolha-gpt">
+      <button class="opcao-btn-escolha-gpt" id="btnMeusDocumentosGpt">
+        <i class="fa fa-folder-open"></i> Meus Documentos
+      </button>
+      <button class="opcao-btn-escolha-gpt" id="btnDocumentosRecebidosGpt">
+        <i class="fa fa-inbox"></i> Documentos Recebidos
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Opções de Seleção GPT -->
+<div id="modalOpcoesSelecaoGpt" class="modal-opcoes-selecao-gpt" style="display:none;">
+  <div class="modal-opcoes-selecao-gpt__content">
+    <button class="modal-opcoes-selecao-gpt__close" id="closeModalOpcoesSelecaoGpt">&times;</button>
+    <h2 class="modal-opcoes-selecao-gpt__title">O que você deseja fazer?</h2>
+    <div class="modal-opcoes-selecao-gpt__btn-group">
+      <button class="modal-opcoes-selecao-gpt__btn" id="btnOpcaoDocumentoGpt">
+        <i class="fa fa-file-alt"></i> Documentos
+      </button>
+      <button class="modal-opcoes-selecao-gpt__btn" id="btnOpcaoSharingGpt">
+        <i class="fa fa-check-square"></i> Selecionar mensagens
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- modal confirmação de logout) -->
+
+<div id="logoutConfirmModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Deseja realmente sair?</h3>
+        <div style="margin-top:16px;">
+            <button id="confirmLogoutBtn" class="btn-primary">Sim, sair</button>
+            <button id="cancelLogoutBtn" class="btn-secondary">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div id="refinedModalOverlay" class="refined-modal-overlay" aria-hidden="true" style="display:none;">
+  <div class="refined-modal" role="dialog" aria-modal="true" aria-labelledby="refinedModalTitle">
+    <div class="refined-modal-header">
+      <h3 id="refinedModalTitle">Prompt Aprimorado</h3>
+      <button id="btnCloseRefinedModal" class="refined-modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="refined-modal-body">
+      <label class="refined-modal-label">Revise e edite o prompt antes de enviar:</label>
+      <!-- Tornar editável: use div contenteditable para edição simples -->
+      <div id="refinedText" class="refined-modal-content" contenteditable="true" role="textbox" aria-multiline="true" tabindex="0"></div>
+    </div>
+    <div class="refined-modal-footer">
+      <button type="button" id="btnAcceptRefined" class="btn-accept">Usar e Enviar</button>
+      <button type="button" id="btnCancelRefined" class="btn-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de aprimoramento (apenas 1 opção, enfatizada) - cole antes de </body> -->
+<div id="refineLevelModalOverlay" class="refine-level-modal-overlay" aria-hidden="true" style="display:none;">
+  <div class="refine-level-modal" role="dialog" aria-modal="true" aria-labelledby="refineLevelModalTitle">
+    <header class="refine-level-modal__header">
+      <h3 id="refineLevelModalTitle">Aprimorar prompt</h3>
+      <button id="refineLevelClose" class="refine-level-modal__close" aria-label="Fechar">&times;</button>
+    </header>
+
+    <section class="refine-level-modal__body">
+      <p class="refine-level-intro" style="margin:0 0 8px 0; font-weight:600; color:#0f172a;">
+        Aprimore seu prompt com clareza, objetividade e foco.
+      </p>
+      <p class="refine-level-sub" style="margin:0 0 12px 0; color:#475569;">
+        Seu texto é reescrito para soar natural, humano e direto, mantendo o objetivo original e eliminando redundâncias.
+        Pronto para usar em qualquer IA com máxima eficiência.
+      </p>
+
+      <label class="refine-level-label">Seu prompt atual</label>
+      <pre id="refineOriginalPrompt" class="refine-level-original" readonly></pre>
+
+      <div class="refine-level__options" role="radiogroup" aria-label="Opção de Aprimoramento" style="margin-top:12px;">
+        <button class="refine-level-option refine-level-option--single" data-level="2" aria-checked="true" role="radio" type="button" style="cursor:pointer;">
+          <div class="level-head" style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-weight:700;color:#0f172a;">MACH I </span>
+            <span class="level-chip" style="background:#eef2ff;color:#0b63d6;padding:4px 8px;border-radius:999px;font-size:0.75rem;">Recomendado</span>
+          </div>
+          <div class="level-desc" style="margin-top:8px;color:#475569;">
+            Aprimore seu prompt com clareza, objetividade e foco.
+Seu texto é reescrito para soar natural, humano e direto, mantendo o objetivo original e eliminando redundâncias.
+Pronto para usar em qualquer IA com máxima eficiência.
+          </div>
+          <div class="level-visual" style="margin-top:10px;color:#0b63d6;font-weight:600;">▁ ▃</div>
+        </button>
+      </div>
+    </section>
+
+    <footer class="refine-level-modal__footer">
+      <button id="refineLevelCancel" class="btn-cancel" type="button">Cancelar</button>
+      <button id="refineLevelConfirm" class="btn-accept" type="button">Confirmar e Aprimorar</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Modal: Gerar Documento (mover do JS para o HTML) -->
+
+<div id="modalInfosGpt" class="gpt-modal" style="display:none;">
+  <div class="gpt-modal-content">
+    <h2 class="gpt-modal-title">Gerar Documento</h2>
+
+    <label class="gpt-field">
+      <span class="gpt-label">Título</span>
+      <input id="modalTituloGpt" type="text" class="gpt-input" />
+    </label>
+
+    <div class="gpt-field">
+      <span class="gpt-label">Objetivo</span>
+      <!-- hidden para manter compatibilidade com outras partes do JS -->
+      <input id="modalObjetivoGpt" type="hidden" value="Revisar" />
+      <select id="modalObjetivoGptSelect" class="gpt-select">
+        <option value="">Escolha...</option>
+        <option value="Revisar">Revisar</option>
+        <option value="Entregar">Entregar</option>
+      </select>
+      <div id="modalObjetivoDescricaoGpt" class="gpt-obj-copy" aria-hidden="true" style="display:none;"></div>
+    </div>
+
+    <label class="gpt-field gpt-prazo-field">
+      <span class="gpt-label">Prazo</span>
+      <div class="gpt-prazo-wrap">
+        <span id="modalPrazoDisplayGpt" class="gpt-prazo-display" role="button" tabindex="0">Sem prazo</span>
+        <input id="modalPrazoGpt" type="date" class="gpt-prazo-input" />
+        <button id="modalPrazoLimparGpt" type="button" class="gpt-btn-clear" aria-hidden="true" style="display:none;">Limpar</button>
+      </div>
+    </label>
+
+    <label class="gpt-field">
+      <span class="gpt-label">Observações</span>
+      <textarea id="modalObsGpt" class="gpt-textarea" rows="4"></textarea>
+    </label>
+
+    <div class="gpt-actions">
+      <button id="btnCancelarModalGpt" type="button" class="gpt-btn gpt-btn-cancel">Cancelar</button>
+      <button id="btnGerarDocumentoGpt" type="button" class="gpt-btn gpt-btn-primary">Gerar Documento</button>
+    </div>
+  </div>
+</div>
+
+    <!-- Scripts JS (funcionalidades do sistema) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="frontend/JS/sharing.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="frontend/JS/workspace-features.js"></script>
+    <script src="frontend/JS/navigation.js"></script>
+    <script src="frontend/JS/chatgpt.js"></script>
+    <script src="frontend/JS/ferramentas.js"></script>
+</body>
+</html>
