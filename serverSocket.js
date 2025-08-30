@@ -132,6 +132,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client')));
+app.use(cors({
+  origin: [
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173',
+    'https://salt-lack-frontend.onrender.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
+  credentials: true
+}));
 
 // ======================== ARQUIVOS DE DADOS ========================
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');

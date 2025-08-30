@@ -437,10 +437,7 @@ frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
 });
 
     try {
-        const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5002' 
-  : 'https://your-colaborativo-server.onrender.com';
-fetch(`${API_BASE}/api/documento/gerar`, {
+        const response = await fetch(`${getApiUrl('colaborativo')}/api/documento/gerar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ infos, mensagens })

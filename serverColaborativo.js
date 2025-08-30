@@ -21,11 +21,11 @@ if (process.env.MIXPANEL_TOKEN) {
 const app = express();
 app.use(cors({
   origin: [
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173',
+    'https://salt-lack-frontend.onrender.com',
     'http://localhost:3000',
-    'https://seu-frontend.onrender.com', // SEU DOMÍNIO AQUI
-    'https://seu-socket-server.onrender.com',
-    'https://seu-lateral-server.onrender.com', 
-    'https://seu-colaborativo-server.onrender.com'
+    'http://127.0.0.1:3000'
   ],
   credentials: true
 }));
