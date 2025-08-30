@@ -1,0 +1,44 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "server:lateral": "nodemon ./serverLateral.js",
+    "server:colaborativo": "nodemon ./serverColaborativo.js",
+    "server:socket": "nodemon ./serverSocket.js",
+    "server:all": "concurrently -k -n LATERAL,COLAB,SOCKET -c blue,magenta,green \"npm:server:lateral\" \"npm:server:colaborativo\" \"npm:server:socket\"",
+    "start": "npm run server:all",
+
+     
+    "start:lateral": "node ./serverLateral.js",
+    "start:colaborativo": "node ./serverColaborativo.js", 
+    "start:socket": "node ./serverSocket.js"
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.57.0",
+    "@google/genai": "^1.13.0",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "google-search-results-nodejs": "^2.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mixpanel": "^0.18.1",
+    "mixpanel-browser": "^2.69.1",
+    "mongodb": "^6.18.0",
+    "mongoose": "^8.18.0",
+    "openai": "^5.10.2",
+    "socket.io": "^4.8.1"
+  }
+}

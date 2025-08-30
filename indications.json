@@ -1,0 +1,136 @@
+{
+  "profiles": [
+    {
+      "id": "openai",
+      "name": "ChatGPT",
+      "tags": ["texto", "conversa", "ajuste de tom", "copywriting", "email", "resumo", "estudo", "explicação", "criatividade", "brainstorming"],
+      "specialties": [
+        "conversação natural",
+        "ajuste de tom e estilo",
+        "produção criativa de textos e copy",
+        "resumos rápidos e claros",
+        "responder dúvidas de estudo",
+        "redação de emails profissionais"
+      ],
+      "strengths": [
+        "Versátil em linguagem",
+        "Ótimo para explicações claras",
+        "Bom para criatividade e ideias",
+        "Adaptável ao tom do usuário"
+      ],
+      "limitations": [
+        "Pode ser menos profundo em textos muito longos",
+        "Não é o mais técnico para código extenso"
+      ],
+      "ideal_use_cases": [
+        "Escrever um email convincente",
+        "Gerar ideias criativas para anúncios",
+        "Explicar conceitos de forma simples",
+        "Ajustar tom de um texto para público específico"
+      ]
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "tags": ["relatório", "análise", "documento", "estrutura", "profundidade", "pesquisa", "conteúdo longo"],
+      "specialties": [
+        "relatórios extensos e detalhados",
+        "documentos formais e estruturados",
+        "resumos longos com clareza",
+        "análises profundas e comparativas"
+      ],
+      "strengths": [
+        "Excelente em textos longos e coesos",
+        "Clareza em análises complexas",
+        "Boa estruturação de documentos técnicos"
+      ],
+      "limitations": [
+        "Menos criativo em textos curtos",
+        "Pode ser formal demais para copywriting"
+      ],
+      "ideal_use_cases": [
+        "Elaborar relatório acadêmico ou empresarial",
+        "Criar análise de mercado detalhada",
+        "Estruturar artigo de mais de 10 páginas",
+        "Produzir dossiê ou documento estratégico"
+      ]
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "tags": ["código", "dados", "cálculo", "precisão", "automação", "ciência", "engenharia", "matemática"],
+      "specialties": [
+        "análise de dados complexos",
+        "programação em múltiplas linguagens",
+        "resolução de cálculos avançados",
+        "precisão técnica em explicações"
+      ],
+      "strengths": [
+        "Altíssima precisão em matemática",
+        "Ótimo para programação",
+        "Ideal para automação de tarefas técnicas"
+      ],
+      "limitations": [
+        "Pouco criativo em textos literários",
+        "Pode ser excessivamente técnico em explicações simples"
+      ],
+      "ideal_use_cases": [
+        "Depurar código em Python ou JavaScript",
+        "Resolver equações matemáticas complexas",
+        "Criar scripts de automação",
+        "Gerar análise estatística detalhada"
+      ]
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "tags": ["organização", "produtividade", "processo", "planejamento", "otimização", "gestão de tarefas", "estratégia"],
+      "specialties": [
+        "produtividade pessoal",
+        "organização de processos",
+        "elaboração de planos de ação",
+        "otimização de tempo e recursos"
+      ],
+      "strengths": [
+        "Clareza na organização de ideias",
+        "Foco em execução prática",
+        "Ajuda a estruturar rotinas"
+      ],
+      "limitations": [
+        "Menos criativo em textos de marketing",
+        "Não é especializado em programação"
+      ],
+      "ideal_use_cases": [
+        "Criar um plano de estudos",
+        "Organizar rotina de trabalho",
+        "Estruturar um projeto passo a passo",
+        "Definir metas e prazos claros"
+      ]
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "tags": ["pesquisa", "atualidade", "informação", "fontes", "resposta rápida", "internet"],
+      "specialties": [
+        "pesquisa em tempo real",
+        "respostas baseadas em fontes atualizadas",
+        "informações factuais recentes"
+      ],
+      "strengths": [
+        "Busca integrada com fontes confiáveis",
+        "Excelente para notícias e tendências",
+        "Referências claras em respostas"
+      ],
+      "limitations": [
+        "Menos criativo em redação",
+        "Não foca em organização de processos"
+      ],
+      "ideal_use_cases": [
+        "Pesquisar notícias mais recentes",
+        "Encontrar dados atualizados",
+        "Consultar referências confiáveis",
+        "Resumir artigos de fontes externas"
+      ]
+    }
+  ]
+}
