@@ -140,8 +140,14 @@ app.use(cors({
     'http://localhost:3000',
     'http://127.0.0.1:3000'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+app.options('*', cors());
 
 // ======================== ARQUIVOS DE DADOS ========================
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');

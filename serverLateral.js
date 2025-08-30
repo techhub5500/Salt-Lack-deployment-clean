@@ -64,7 +64,6 @@ function trackMessageSent(userId) {
   }
 }
 
-const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173', 
@@ -73,8 +72,16 @@ app.use(cors({
     'http://localhost:3000',
     'http://127.0.0.1:3000'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// ADICIONAR esta linha também (para tratar preflight manualmente se necessário):
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.json());
 
