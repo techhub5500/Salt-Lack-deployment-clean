@@ -16,29 +16,49 @@ import Mixpanel from 'mixpanel';
 
 const app = express();
 
-// ORDEM CORRETA DOS MIDDLEWARES:
-// 1. PRIMEIRO: CORS principal
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://127.0.0.1:5173',
-    'https://salt-lack-frontend.onrender.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173', 
+      'https://salt-lack-frontend.onrender.com',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+    
+    // Permitir requisições sem origin (ex: Postman, apps mobile)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS bloqueado para origin: ${origin}`);
+    return callback(new Error('Não permitido pelo CORS'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 200
 }));
 
-// 2. SEGUNDO: Handler específico para OPTIONS
-app.options('*', cors());
+// Handler explícito para OPTIONS
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'https://salt-lack-frontend.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
-// 3. TERCEIRO: Express JSON (apenas uma vez!)
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`🔍 ${req.method} ${req.path} from ${req.get('Origin')}`);
+  res.header('Access-Control-Allow-Origin', 'https://salt-lack-frontend.onrender.com');
+  next();
+});
 
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {
