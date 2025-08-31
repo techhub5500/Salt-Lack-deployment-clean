@@ -7,42 +7,23 @@ import Mixpanel from 'mixpanel';
  dotenv.config();
 
 const app = express();
-const allowed = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'https://salt-lack-frontend.onrender.com',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'https://salt-lack-colaborativo.onrender.com' // adicionada conforme log do Render
-];
-
 app.use(cors({
-  origin: (origin, cb) => {
-    // permite chamadas sem origin (curl/postman) e origins listadas
-    if (!origin) return cb(null, true);
-    if (allowed.includes(origin)) return cb(null, true);
-    return cb(new Error('Origin not allowed by CORS'));
-  },
+  origin: [
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173',
+    'https://salt-lack-frontend.onrender.com', // ✅ Seu frontend
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://salt-lack.onrender.com' // ✅ Socket server se necessário
+  ],
   credentials: true,
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization','X-Requested-With']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
-// garante tratamento explícito do preflight (resposta imediata com headers)
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  if (!origin || allowed.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return res.sendStatus(204);
-  }
-  return res.sendStatus(403);
-});
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.options('*', cors());
 
 let mixpanel;
 if (process.env.MIXPANEL_TOKEN) {
