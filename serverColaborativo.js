@@ -13,7 +13,8 @@ app.use(cors({
     'http://127.0.0.1:5173', 
     'https://salt-lack-frontend.onrender.com',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    'https://salt-lack-colaborativo.onrender.com'
   ],
   credentials: true
 }));
