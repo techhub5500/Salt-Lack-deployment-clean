@@ -397,44 +397,41 @@ async function enviarDocumentoBackend() {
     const modal = document.getElementById('modalInfosGpt');
     
     // VALIDAÇÃO DE TÍTULO ANTES DO ENVIO
-    const titulo = document.getElementById('modalTituloGpt').value.trim();
+    const tituloEl = document.getElementById('modalTituloGpt');
+    const titulo = tituloEl ? tituloEl.value.trim() : '';
     if (!titulo) {
         alert('Por favor, preencha o título do documento antes de gerar.');
-        document.getElementById('modalTituloGpt').focus();
+        if (tituloEl) tituloEl.focus();
         return;
     }
     
     const infos = {
         titulo: titulo,
-        objetivo: document.getElementById('modalObjetivoGpt').value,
-        prazo: document.getElementById('modalPrazoGpt').value,
-        observacoes: document.getElementById('modalObsGpt').value
+        objetivo: document.getElementById('modalObjetivoGpt')?.value || '',
+        prazo: document.getElementById('modalPrazoGpt')?.value || '',
+        observacoes: document.getElementById('modalObsGpt')?.value || ''
     };
     const mensagens = selectedChatMessages.sort((a, b) => a - b)
         .map(idx => currentChatMessages[idx]);
 
     // Mostra spinner e modal do documento gerado
     const docContainer = document.getElementById('documentoGeradoContainerGpt');
-const spinner = document.getElementById('documentoSpinnerGpt');
-const docContent = document.getElementById('documentoGeradoContentGpt');
-const btnSalvar = document.getElementById('btnSalvarDocumentoGeradoGpt');
-const btnCancelar = document.getElementById('btnCancelarDocumentoGeradoGpt');
-if (docContainer && spinner && docContent) {
-    docContainer.classList.remove('hidden');
-    spinner.classList.remove('hidden');
-    docContent.innerHTML = '';
-    if (btnSalvar) btnSalvar.classList.add('hidden');
-    if (btnCancelar) btnCancelar.classList.add('hidden');
-}
+    const spinner = document.getElementById('documentoSpinnerGpt');
+    const docContent = document.getElementById('documentoGeradoContentGpt');
+    const btnSalvar = document.getElementById('btnSalvarDocumentoGeradoGpt');
+    const btnCancelar = document.getElementById('btnCancelarDocumentoGeradoGpt');
+    if (docContainer && spinner && docContent) {
+        docContainer.classList.remove('hidden');
+        spinner.classList.remove('hidden');
+        docContent.innerHTML = '';
+        if (btnSalvar) btnSalvar.classList.add('hidden');
+        if (btnCancelar) btnCancelar.classList.add('hidden');
+    }
 
-let frasesSpinnerControl = null;
-frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
-    // Quando terminar as frases, aguarda documento pronto para ocultar frase
-    frasesSpinnerControl.manterUltimaFrase = function() {
-        // Mantém última frase até documento pronto
-    };
-    frasesSpinnerControl.ocultarFrase = ocultarFrase;
-});
+    let frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
+        frasesSpinnerControl.manterUltimaFrase = function() {};
+        frasesSpinnerControl.ocultarFrase = ocultarFrase;
+    });
 
     try {
         const response = await fetch(`${getApiUrl('colaborativo')}/api/documento/gerar`, {
@@ -444,7 +441,8 @@ frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
         });
         
         if (!response.ok) {
-            throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            const bodyText = await response.text().catch(()=>null);
+            throw new Error(`Erro ${response.status}: ${response.statusText} ${bodyText ? '- ' + bodyText : ''}`);
         }
         
         const data = await response.json();
@@ -453,10 +451,9 @@ frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
         if (spinner) spinner.classList.add('hidden');
         if (btnSalvar) btnSalvar.classList.remove('hidden');
         if (btnCancelar) btnCancelar.classList.remove('hidden');
-        // Oculta frase do spinner
-        if (frasesSpinnerControl && typeof frasesSpinnerControl.ocultarFrase === 'function') {
-            frasesSpinnerControl.ocultarFrase();
-        }
+
+        if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
+
         mostrarDocumentoGeradoComSalvar(
             data.documento || 'Erro ao gerar documento.',
             null,
@@ -469,13 +466,10 @@ frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
     } catch (error) {
         console.error('Erro detalhado:', error);
         if (spinner) spinner.classList.add('hidden');
-if (btnSalvar) btnSalvar.classList.remove('hidden');
-if (btnCancelar) btnCancelar.classList.remove('hidden');
-// Oculta frase do spinner
-if (frasesSpinnerControl && typeof frasesSpinnerControl.ocultarFrase === 'function') {
-    frasesSpinnerControl.ocultarFrase();
-}
-alert('Erro ao gerar documento. Verifique se o backend está rodando na porta 5002.');
+        if (btnSalvar) btnSalvar.classList.remove('hidden');
+        if (btnCancelar) btnCancelar.classList.remove('hidden');
+        if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
+        alert('Erro ao gerar documento. Verifique se o backend está acessível.');
     }
 }
 
