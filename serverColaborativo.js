@@ -12,7 +12,8 @@ const allowed = [
   'http://127.0.0.1:5173',
   'https://salt-lack-frontend.onrender.com',
   'http://localhost:3000',
-  'http://127.0.0.1:3000'
+  'http://127.0.0.1:3000',
+  'https://salt-lack-colaborativo.onrender.com' // adicionada conforme log do Render
 ];
 
 app.use(cors({
@@ -27,8 +28,18 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization','X-Requested-With']
 }));
 
-// garante tratamento explícito do preflight
-app.options('*', cors());
+// garante tratamento explícito do preflight (resposta imediata com headers)
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  if (!origin || allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    return res.sendStatus(204);
+  }
+  return res.sendStatus(403);
+});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
