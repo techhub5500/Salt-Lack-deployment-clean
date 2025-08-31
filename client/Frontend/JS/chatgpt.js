@@ -1975,7 +1975,7 @@ async function salvarDocumentoNoBackend(htmlDocumento) {
         observacoes: ''
     };
     const mensagens = [];
-    await fetch('http://localhost:5002/api/documento', {
+    await fetch(`${getApiUrl('colaborativo')}/api/documento`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ infos, mensagens, documento: htmlDocumento })
