@@ -131,17 +131,24 @@ const __dirname = path.dirname(__filename);
 const server = http.createServer(app);
 const io = new SocketIo(server, {
   cors: {
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'https://your-frontend-app.onrender.com', // Adicione seu domínio
-      'https://your-socket-server.onrender.com'
+   origin: [
+     'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://salt-lack-frontend.onrender.com', // Adicione seu domínio
+     'https://salt-lack-frontend.onrender.com'
     ],
+   origin: [
+    'http://localhost:3000',
+     'http://127.0.0.1:3000',
+     'http://localhost:5173',
+      'http://127.0.0.1:5173',
+     'https://salt-lack-frontend.onrender.com' // <- ADD this real frontend origin
+   ],
     methods: ['GET', 'POST'],
     credentials: true
   }
 });
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT_SOCKET || process.env.PORT || 3000;
 
 // ======================== ARQUIVOS DE DADOS ========================
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
