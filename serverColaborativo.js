@@ -7,16 +7,28 @@ import Mixpanel from 'mixpanel';
  dotenv.config();
 
 const app = express();
+const allowed = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://salt-lack-frontend.onrender.com',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173', 
-    'https://salt-lack-frontend.onrender.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
-  credentials: true
+  origin: (origin, cb) => {
+    // permite chamadas sem origin (curl/postman) e origins listadas
+    if (!origin) return cb(null, true);
+    if (allowed.includes(origin)) return cb(null, true);
+    return cb(new Error('Origin not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization','X-Requested-With']
 }));
+
+// garante tratamento explícito do preflight
+app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
