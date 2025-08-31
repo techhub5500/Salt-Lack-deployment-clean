@@ -443,27 +443,27 @@ frasesSpinnerControl = mostrarFrasesSpinnerDocumento(function(ocultarFrase) {
             body: JSON.stringify({ infos, mensagens })
         });
         
-        if (!res.ok) {
-            throw new Error(`Erro ${res.status}: ${res.statusText}`);
+        if (!response.ok) {
+            throw new Error(`Erro ${response.status}: ${response.statusText}`);
         }
         
-        const data = await res.json();
+        const data = await response.json();
 
         // Esconde spinner e exibe documento gerado
         if (spinner) spinner.classList.add('hidden');
-if (btnSalvar) btnSalvar.classList.remove('hidden');
-if (btnCancelar) btnCancelar.classList.remove('hidden');
-// Oculta frase do spinner
-if (frasesSpinnerControl && typeof frasesSpinnerControl.ocultarFrase === 'function') {
-    frasesSpinnerControl.ocultarFrase();
-}
-mostrarDocumentoGeradoComSalvar(
-    data.documento || 'Erro ao gerar documento.',
-    null,
-    [],
-    infos,      // <-- Adicione esta linha
-    mensagens   // <-- Adicione esta linha
-);
+        if (btnSalvar) btnSalvar.classList.remove('hidden');
+        if (btnCancelar) btnCancelar.classList.remove('hidden');
+        // Oculta frase do spinner
+        if (frasesSpinnerControl && typeof frasesSpinnerControl.ocultarFrase === 'function') {
+            frasesSpinnerControl.ocultarFrase();
+        }
+        mostrarDocumentoGeradoComSalvar(
+            data.documento || 'Erro ao gerar documento.',
+            null,
+            [],
+            infos,
+            mensagens
+        );
         if (modal) modal.style.display = 'none';
         
     } catch (error) {
