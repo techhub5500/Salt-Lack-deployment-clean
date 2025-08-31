@@ -11,12 +11,16 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://127.0.0.1:5173', 
-    'https://salt-lack-frontend.onrender.com',
+    'https://salt-lack-frontend.onrender.com', // ✅ Seu frontend está aqui
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://salt-lack-colaborativo.onrender.com'
+    'https://salt-lack-colaborativo.onrender.com', // ✅ Adicione outros domínios se necessário
+    'https://salt-lack.onrender.com', // ✅ Adicione o domínio principal também
+    'https://salt-lack-lateral.onrender.com' // ✅ Adicione o lateral também
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // ✅ Adicione OPTIONS para preflight
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'] // ✅ Adicione headers necessários
 }));
 
 app.use(express.json({ limit: '10mb' }));
