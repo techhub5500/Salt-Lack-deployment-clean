@@ -436,9 +436,11 @@ async function enviarDocumentoBackend() {
 
     try {
         // Tenta primeiro o servidor colaborativo
-        let apiUrl = `${getApiUrl('colaborativo')}/api/documento/gerar`;
+         let apiUrl = `${getApiUrl('colaborativo')}/api/documento/gerar`;
         console.log('Tentando URL colaborativo:', apiUrl);
         
+        const controller = new AbortController();
+         const timeoutId = setTimeout(() => controller.abort(), 30000);
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 
@@ -446,8 +448,10 @@ async function enviarDocumentoBackend() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({ infos, mensagens }),
-            timeout: 30000 // 30 segundos timeout
+            signal: controller.signal // ✅ Usar signal para timeout
         });
+
+        clearTimeout(timeoutId); 
         
         if (!response.ok) {
             // Se falhar, tenta servidor lateral como fallback
