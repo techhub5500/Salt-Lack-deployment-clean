@@ -473,7 +473,6 @@ async function enviarDocumentoBackend() {
     }
 }
 
-
 // --- SUGESTÃO INTELIGENTE DE IA ---
 // Detecta tipo de tarefa e sugere IA ideal
 function detectarTipoTarefa(prompt) {
