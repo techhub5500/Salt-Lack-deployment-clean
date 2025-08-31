@@ -12,7 +12,7 @@ const CHATGPT_HISTORY_LIMIT = 100;
 
 
 function getApiUrl(service) {
-    const isProduction = window.location.hostname !== 'localhost';
+    const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     const urls = {
         socket: isProduction ? 'https://salt-lack.onrender.com' : 'http://localhost:3000',
         lateral: isProduction ? 'https://salt-lack-lateral.onrender.com' : 'http://localhost:5001', 
@@ -420,6 +420,7 @@ async function enviarDocumentoBackend() {
     const docContent = document.getElementById('documentoGeradoContentGpt');
     const btnSalvar = document.getElementById('btnSalvarDocumentoGeradoGpt');
     const btnCancelar = document.getElementById('btnCancelarDocumentoGeradoGpt');
+    
     if (docContainer && spinner && docContent) {
         docContainer.classList.remove('hidden');
         spinner.classList.remove('hidden');
@@ -434,43 +435,133 @@ async function enviarDocumentoBackend() {
     });
 
     try {
-        const response = await fetch(`${getApiUrl('colaborativo')}/api/documento/gerar`, {
+        // Tenta primeiro o servidor colaborativo
+        let apiUrl = `${getApiUrl('colaborativo')}/api/documento/gerar`;
+        console.log('Tentando URL colaborativo:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ infos, mensagens })
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ infos, mensagens }),
+            timeout: 30000 // 30 segundos timeout
         });
         
         if (!response.ok) {
-            const bodyText = await response.text().catch(()=>null);
-            throw new Error(`Erro ${response.status}: ${response.statusText} ${bodyText ? '- ' + bodyText : ''}`);
+            // Se falhar, tenta servidor lateral como fallback
+            console.warn('Servidor colaborativo falhou, tentando servidor lateral...');
+            
+            // Verifica se existe endpoint no servidor lateral
+            const fallbackUrl = `${getApiUrl('lateral')}/api/documento/gerar`;
+            console.log('Tentando URL lateral:', fallbackUrl);
+            
+            const fallbackResponse = await fetch(fallbackUrl, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ infos, mensagens }),
+                timeout: 30000
+            });
+            
+            if (!fallbackResponse.ok) {
+                // Se ambos falharam, gera documento localmente
+                console.warn('Ambos servidores falharam, gerando documento localmente...');
+                const documentoLocal = gerarDocumentoLocal(infos, mensagens);
+                processDocumentResponse({ documento: documentoLocal }, infos, mensagens, spinner, btnSalvar, btnCancelar, frasesSpinnerControl, modal);
+                return;
+            }
+            
+            const fallbackData = await fallbackResponse.json();
+            processDocumentResponse(fallbackData, infos, mensagens, spinner, btnSalvar, btnCancelar, frasesSpinnerControl, modal);
+            return;
         }
         
         const data = await response.json();
-
-        // Esconde spinner e exibe documento gerado
-        if (spinner) spinner.classList.add('hidden');
-        if (btnSalvar) btnSalvar.classList.remove('hidden');
-        if (btnCancelar) btnCancelar.classList.remove('hidden');
-
-        if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
-
-        mostrarDocumentoGeradoComSalvar(
-            data.documento || 'Erro ao gerar documento.',
-            null,
-            [],
-            infos,
-            mensagens
-        );
-        if (modal) modal.style.display = 'none';
+        processDocumentResponse(data, infos, mensagens, spinner, btnSalvar, btnCancelar, frasesSpinnerControl, modal);
         
     } catch (error) {
         console.error('Erro detalhado:', error);
-        if (spinner) spinner.classList.add('hidden');
-        if (btnSalvar) btnSalvar.classList.remove('hidden');
-        if (btnCancelar) btnCancelar.classList.remove('hidden');
-        if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
-        alert('Erro ao gerar documento. Verifique se o backend está acessível.');
+        
+        // Fallback final: gera documento localmente
+        try {
+            console.log('Gerando documento localmente como último recurso...');
+            const documentoLocal = gerarDocumentoLocal(infos, mensagens);
+            processDocumentResponse({ documento: documentoLocal }, infos, mensagens, spinner, btnSalvar, btnCancelar, frasesSpinnerControl, modal);
+        } catch (localError) {
+            console.error('Erro ao gerar documento local:', localError);
+            
+            if (spinner) spinner.classList.add('hidden');
+            if (btnSalvar) btnSalvar.classList.remove('hidden');
+            if (btnCancelar) btnCancelar.classList.remove('hidden');
+            if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
+            
+            // Mensagem de erro mais específica
+            let errorMessage = 'Erro ao gerar documento. ';
+            if (error.message.includes('CORS') || error.message.includes('blocked')) {
+                errorMessage += 'Problema de CORS - verifique se os servidores estão configurados corretamente.';
+            } else if (error.message.includes('Failed to fetch')) {
+                errorMessage += 'Servidor indisponível - verifique se o servidor colaborativo está rodando.';
+            } else {
+                errorMessage += 'Verifique sua conexão e tente novamente.';
+            }
+            
+            alert(errorMessage);
+        }
     }
+}
+
+function processDocumentResponse(data, infos, mensagens, spinner, btnSalvar, btnCancelar, frasesSpinnerControl, modal) {
+    // Esconde spinner e exibe documento gerado
+    if (spinner) spinner.classList.add('hidden');
+    if (btnSalvar) btnSalvar.classList.remove('hidden');
+    if (btnCancelar) btnCancelar.classList.remove('hidden');
+
+    if (frasesSpinnerControl?.ocultarFrase) frasesSpinnerControl.ocultarFrase();
+
+    mostrarDocumentoGeradoComSalvar(
+        data.documento || 'Erro ao gerar documento.',
+        null,
+        [],
+        infos,
+        mensagens
+    );
+    if (modal) modal.style.display = 'none';
+}
+
+function gerarDocumentoLocal(infos, mensagens) {
+    const agora = new Date().toLocaleString('pt-BR');
+    
+    let conteudoMensagens = '';
+    if (mensagens && mensagens.length > 0) {
+        conteudoMensagens = mensagens.map(msg => {
+            const tipo = msg.role === 'user' ? 'Usuário' : 'IA';
+            return `**${tipo}:** ${msg.text}`;
+        }).join('\n\n');
+    }
+    
+    return `# ${infos.titulo || 'Documento Gerado'}
+
+**Data de Criação:** ${agora}
+
+## Informações do Documento
+
+**Objetivo:** ${infos.objetivo || 'Não especificado'}
+**Prazo:** ${infos.prazo || 'Não definido'}
+**Observações:** ${infos.observacoes || 'Nenhuma observação adicional'}
+
+---
+
+## Conteúdo das Mensagens
+
+${conteudoMensagens || 'Nenhuma mensagem selecionada'}
+
+---
+
+*Documento gerado localmente devido à indisponibilidade do servidor.*`;
 }
 
 // --- SUGESTÃO INTELIGENTE DE IA ---
