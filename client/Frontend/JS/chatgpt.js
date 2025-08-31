@@ -458,7 +458,7 @@ async function enviarDocumentoBackend() {
             console.warn('Servidor colaborativo falhou, tentando servidor lateral...');
             
             // Verifica se existe endpoint no servidor lateral
-            const fallbackUrl = `${getApiUrl('lateral')}/api/documento/gerar`;
+            const fallbackUrl = `${getApiUrl('colaborativo')}/api/documento/gerar`;
             console.log('Tentando URL lateral:', fallbackUrl);
             
             const fallbackResponse = await fetch(fallbackUrl, {
